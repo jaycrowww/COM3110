@@ -8,43 +8,44 @@ class Retrieve:
         self.termWeighting = termWeighting
         
         
-        # initialise precomputed processes
-        self.idf_values = defaultdict(int)
-        
-        # Dictionary of documents and the number of elements they contain
-    
-        self.docid_num_elements = defaultdict(int)
-        self.document_vector_sizes = defaultdict(int)
+        # Number of Documents in Collection
         self.collection_size = 0
         
+        # Dictionary of IDF values 
+        self.idf_values = defaultdict(int)
         
-        # Creating Document Vector Size Dict
+        
+        # Recording
+        self.docid_num_elements = defaultdict(int)
+        
+        # Recording list of idf + tf values per docid
+        self.docid_idf_values = defaultdict(list)
+        self.docid_tf_values= defaultdict(list)
+        
+        
+        #self.document_summed_vectors = defaultdict(int)
+        
         
         # Creating docid_num_elements
         for term in self.index:
-            # gets docid
+            # recording how many terms are in each document (number of elements)
             for docid in self.index[term]:
-                self.docid_num_elements[docid] += 1
-                                
-                """if self.termWeighting == 'binary':
-                    self.document_vector_sizes[docid] += 1
                 
-                # Document Sizes with Term Frequency Consideration
-                else:
-                    # print("term[entry]:", term[entry])
-                    self.document_vector_sizes[docid] += self.index[term][docid]/len()"""
-                    
+                # NORMALISED: storing frequencies without normalisation
                 if self.termWeighting == 'binary':
-                    self.document_vector_sizes[docid] += 1
-        print("++UPDATE: document vector size for", 4, "is", self.document_vector_sizes[4])
-
-            
-        
+                    self.docid_num_elements[docid] += 1
+                    #self.docid_num_elements[docid] += self.index[term][docid]
+                
+                # NOT NORMALISED: Document Sizes with Term Frequency Consideration
+                else:
+                    self.document_summed_vectors[docid] += self.index[term][docid]
+# -----------------------------------------------------------------------------
         # Calculate Collection Size
         for docid in self.docid_num_elements:
             self.collection_size += 1
         print("*** Collection size = " + str(self.collection_size)) 
-        
+
+# -----------------------------------------------------------------------------        
         # Calculate IDF        
         if self.termWeighting == 'tfidf':
             for term in self.index:
@@ -57,7 +58,8 @@ class Retrieve:
                 self.idf_values[term] = idf
                 
         #print("idf values:", self.idf_values)
-        
+
+# -----------------------------------------------------------------------------        
         # Creating document_vector_sizes for tf & tfidf
         if self.termWeighting != 'binary':
             
