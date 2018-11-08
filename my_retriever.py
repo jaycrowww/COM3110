@@ -12,10 +12,9 @@ class Retrieve:
         self.collection_size = 0
         
         # Dictionary of IDF values 
-        self.idf_values = defaultdict(int)
+        self.collection_idf_values = defaultdict(float)
         
-        
-        # Recording
+        # Recording number f elements
         self.docid_num_elements = defaultdict(int)
         
         # Recording list of idf + tf values per docid
@@ -25,11 +24,37 @@ class Retrieve:
         
         #self.document_summed_vectors = defaultdict(int)
         
-        
+# ----------------------------------------------------------------------------        
+        # Obtaining Collection Size
+        set_of_docids = set()
         # Creating docid_num_elements
         for term in self.index:
-            # recording how many terms are in each document (number of elements)
             for docid in self.index[term]:
+                set_of_docids.add(docid)
+        self.collection_size = len(set_of_docids)
+        
+# ----------------------------------------------------------------------------
+        # Calculate IDF per term        
+        if self.termWeighting == 'tfidf':
+            for term in self.index:
+                # Calculate dfw
+                num_occurrences = len(self.index[term])
+                #print("** num_ocurrences:", num_occurrences)
+                
+                idf = log10(self.collection_size/num_occurrences)
+                
+                self.collection_idf_values[term] = idf
+                    
+# ----------------------------------------------------------------------------                    
+        # Calculating tf & idf per doc
+        for term in self.index:    
+            # RECORDING TERM FREQUENCY VALUES
+            for docid in self.index[term]:
+                self.docid_tf_values[docid] += self.index[term][docid]
+                self.docid_idf_values[docid] += self.index[term][docid] * self.docid_idf_values
+                self.docid_num_elements += self.index[term][docid]
+                
+                
                 
                 # NORMALISED: storing frequencies without normalisation
                 if self.termWeighting == 'binary':
@@ -40,22 +65,13 @@ class Retrieve:
                 else:
                     self.document_summed_vectors[docid] += self.index[term][docid]
 # -----------------------------------------------------------------------------
-        # Calculate Collection Size
+        """# Calculate Collection Size
         for docid in self.docid_num_elements:
             self.collection_size += 1
         print("*** Collection size = " + str(self.collection_size)) 
-
+"""
 # -----------------------------------------------------------------------------        
-        # Calculate IDF        
-        if self.termWeighting == 'tfidf':
-            for term in self.index:
-                # Calculate dfw
-                num_occurrences = len(self.index[term])
-                #print("** num_ocurrences:", num_occurrences)
-                
-                idf = log10(self.collection_size/num_occurrences)
-                
-                self.idf_values[term] = idf
+       
                 
         #print("idf values:", self.idf_values)
 
